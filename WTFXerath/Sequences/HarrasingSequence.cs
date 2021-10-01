@@ -54,7 +54,7 @@ namespace WTFXerath.Sequences
         {
             var spellBook = UnitManager.MyChampion.GetSpellBook();
 
-            if (CachedTarget != null && spellBook.GetSpellClass(SpellSlot.Q).IsSpellReady)
+            if (CachedTarget != null && CachedTarget != default(GameObjectBase) && spellBook.GetSpellClass(SpellSlot.Q).IsSpellReady)
                 HarrasCachedTarget();
 
             return Task.CompletedTask;
@@ -68,19 +68,23 @@ namespace WTFXerath.Sequences
                 var calcEndVec = CachedTarget.Position + dir * ((CachedTarget.UnitComponentInfo.UnitBaseMoveSpeed / (CachedTarget.AIManager.NavTargetPosition - CachedTarget.Position).Length()) + 200);
 
                 SpellCastProvider.ReleaseChargeSpell(SpellCastSlot.Q, CachedTarget.AIManager.IsMoving ? calcEndVec : CachedTarget.Position, 0);
+                IsInQCastMode = false;
             }
 
             if (CachedTarget == null && ReleaseTick > 0)
+            {
                 GameEngine.IssueOrder(GameEngine.OrderType.Stop, UnitManager.MyChampion.Position);
-
-            IsInQCastMode = false;
+                IsInQCastMode = false;
+            }
 
             return Task.CompletedTask;
         }
 
         public void HarrasCachedTarget()
         {
-            if (ReleaseTick == 0)
+            var spellBook = UnitManager.MyChampion.GetSpellBook();
+
+            if (ReleaseTick == 0 && UnitManager.MyChampion.Mana >= spellBook.GetSpellClass(SpellSlot.Q).SpellData.ResourceCost)
                 ChargeInitialQ();
 
             if (Main.CacheTick >= ReleaseTick)

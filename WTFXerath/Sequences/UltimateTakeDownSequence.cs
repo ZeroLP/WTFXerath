@@ -47,8 +47,12 @@ namespace WTFXerath.Sequences
 
         private Task CoreEvents_OnCoreMainTick1()
         {
+            var rSpellClass = UnitManager.MyChampion.GetSpellBook().GetSpellClass(SpellSlot.R);
+
             if (KeyboardProvider.IsShiftPressed()
-                && RTargetableCachedTarget != null && UnitManager.MyChampion.GetSpellBook().GetSpellClass(SpellSlot.R).IsSpellReady)
+                && RTargetableCachedTarget != null && RTargetableCachedTarget != default(GameObjectBase) 
+                && rSpellClass.IsSpellReady
+                && UnitManager.MyChampion.Mana >= rSpellClass.SpellData.ResourceCost)
             {
                 var dir = Vector3.Normalize((RTargetableCachedTarget.AIManager.NavTargetPosition - RTargetableCachedTarget.Position));
                 var calcEndVec = RTargetableCachedTarget.Position + dir * ((RTargetableCachedTarget.UnitComponentInfo.UnitBaseMoveSpeed / (RTargetableCachedTarget.AIManager.NavTargetPosition - RTargetableCachedTarget.Position).Length()) + 600);
